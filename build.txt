@@ -1,7 +1,7 @@
-docker build   -t jafarijason/jrj-mt5-api-docker:1.0.2 .
-docker push jafarijason/jrj-mt5-api-docker:1.0.2
+docker build   -t jafarijason/jrj-mt5-api-docker:1.0.3 .
+docker push jafarijason/jrj-mt5-api-docker:1.0.3
 
 docker run --platform linux/amd64 \
     -it --rm -p 8000:8000   \
     --env-file .env \
-    --name jrjMt5Ap jafarijason/jrj-mt5-api-docker:1.0.2
+    --name jrjMt5Ap jafarijason/jrj-mt5-api-docker:1.0.3

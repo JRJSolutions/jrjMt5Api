@@ -5,6 +5,7 @@ import numpy as np
 from mt5linux import MetaTrader5
 from dotenv import load_dotenv
 # connecto to the server
+import sys
 
 
 import os
@@ -169,6 +170,8 @@ async def mt5Handler(request: Request):
     except Exception as e:
         if str(e) == 'stream has been closed':
             isIniTilize['initiate'] = None
+            sys.exit(1)
         isIniTilize['initiate'] = None
+        sys.exit(1)
 
         return {"error": str(e)}
