@@ -2,13 +2,40 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from datetime import datetime
 import numpy as np
-import MetaTrader5 as mt5
+from mt5linux import MetaTrader5
+from dotenv import load_dotenv
+# connecto to the server
+
+
+import os
+
+from pathlib import Path
+
+# Define the path to your .env file
+env_path = Path('.') / '.env'
+
+# Check if the file exists before loading
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+    print("✅ .env loaded")
+else:
+    print("⚠️ .env file not found")
+
+mt5 = MetaTrader5(
+    host = os.environ.get('MT_LINUX_SERVER', 'localhost'),
+    port = int(os.environ.get('MT_LINUX_PORT',8001)) 
+) 
 
 app = FastAPI()
 
+
 # Initialize MT5 once
 isIniTilize = {'initiate': None}
-mt5.initialize()
+mt5.initialize(
+    login=int(os.environ.get('MT_BROKER_USERNAME',1234)),       
+    password=os.environ.get('MT_BROKER_USERNAME','MT_BROKER_USERNAME'),   
+    server=os.environ.get('MT_BROKER_SERVER','MT_BROKER_SERVER')        
+)
 
 
 @app.get("/")
@@ -81,7 +108,11 @@ def make_json_safe(data):
 @app.post("/mt5")
 async def mt5Handler(request: Request):
     if isIniTilize['initiate'] is None:
-        mt5.initialize()
+        mt5.initialize(
+            login=int(os.environ.get('MT_BROKER_USERNAME',1234)),       
+            password=os.environ.get('MT_BROKER_PASSWORD','MT_BROKER_PASSWORD'),   
+            server=os.environ.get('MT_BROKER_SERVER','MT_BROKER_SERVER')        
+        )
         isIniTilize['initiate'] = True
 
     body = await request.json()
@@ -128,4 +159,8 @@ async def mt5Handler(request: Request):
         return JSONResponse(content=make_json_safe(result))
 
     except Exception as e:
+        if str(e) == 'stream has been closed':
+            isIniTilize['initiate'] = None
+        isIniTilize['initiate'] = None
+
         return {"error": str(e)}
