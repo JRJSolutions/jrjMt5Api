@@ -37,6 +37,14 @@ mt5.initialize(
     server=os.environ.get('MT_BROKER_SERVER','MT_BROKER_SERVER')        
 )
 
+@app.middleware("http")
+async def validate_header(request: Request, call_next):
+    token = request.headers.get("MT-X-API-TOKEN")
+    if token != os.environ.get('MT_X_API_TOKEN','MT_X_API_TOKEN'):
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    return await call_next(request)
+
+
 
 @app.get("/")
 def read_root():
